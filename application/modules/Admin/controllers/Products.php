@@ -367,4 +367,46 @@ class ProductsController extends AdminBasicController
         Helper::response($result);
     }
 	
+    public function imguploadAction(){
+        if ($this->AdminUser==FALSE AND empty($this->AdminUser)) {
+            $data = array('code' => 1000, 'msg' => '请登录');
+            Helper::response($data);
+        }
+        if(is_array($_FILES) AND !empty($_FILES) AND isset($_FILES['file'])){
+            if(isset($_FILES["file"]["error"]) AND $_FILES["file"]["error"]){
+                $data = array('code' => 1000, 'msg' =>$_FILES["file"]["error"]);
+                Helper::response($data); 
+            }else{
+                try{
+                    $ext = pathinfo($_FILES['file']['name']);
+                    $ext = strtolower($ext['extension']);
+                    $tempFile = $_FILES['file']['tmp_name'];
+                    $targetPath  = UPLOAD_PATH.'/'.CUR_DATE;
+                    if( !is_dir($targetPath) ){
+                        mkdir($targetPath,0777,true);
+                    }
+                    $filename=date("His");
+                    $new_file_name = $filename.'.'.$ext;
+                    $targetFile = $targetPath .'/'. $new_file_name;
+                    move_uploaded_file($tempFile,$targetFile);
+                    if( !file_exists( $targetFile ) ){
+                        $data = array('code' => 1000, 'msg' => '上传失败');
+                    } elseif( !$imginfo=getimagesize($targetFile) ) {
+                        $data = array('code' => 1000, 'msg' => '上传失败,文件不存在 ');
+                    } else {
+                        \Yaf\Loader::import(FUNC_PATH.'/F_Img.php');
+                        image_center_crop($targetFile, $imginfo[0], $imginfo[1], $targetFile);
+                        $img = '/res/upload/'.CUR_DATE.'/'.$new_file_name;
+                        $data = array('code' => 0, 'msg' => 'success','data'=>array('src'=>$img));
+                    }
+                }catch(\Exception $e) {
+                    $data = array('code' => 1002, 'msg' => $e->getMessage(),'data'=>array());
+                }
+            }
+        }else{
+            $data = array('code' => 1000, 'msg' => '上传内容为空,请重新上传','data'=>array());
+        }
+        Helper::response($data);
+    }
+	
 }
