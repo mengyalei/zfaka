@@ -5,9 +5,14 @@ layui.define(['layer', 'table', 'form','layedit','upload'], function(exports){
 	var form = layui.form;
 	var layedit = layui.layedit;
 	var upload = layui.upload;
-	
+	layedit.set({
+        	uploadImage: {
+            		url: '/'+ADMIN_DIR+'/products/imgupload',
+            		type: 'post'
+        	}
+    	});
 	var edit_description=layedit.build('description',{
-		tool: ['strong','italic','underline','|','del','left','center','right','link','unlink','face']
+		tool: ['strong','italic','underline','|','del','left','center','right','link','unlink','face','image']
 	});	 //建立编辑器
 		
 	table.render({
